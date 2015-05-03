@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Questions</title>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+    <script type="text/javascript" src="/javascripts/jquery-1.11.2.js"></script>
+    <script type="application/javascript">
+        function doSubmit() {
+            var question = document.getElementById("question_container").value;
+            var tags = document.getElementById("question_tags").value;
+            var difficulty = document.getElementById("question_difficulty").value;
+
+            if(isEmpty(question)) {
+                alert("enter Question");
+                return;
+            }
+
+            console.log(tags);
+            if(isEmpty(tags)) {
+                alert("enter tags");
+                return;
+            }
+
+            if(isEmpty(difficulty)) {
+                alert("enter difficulty level");
+                return;
+            }
+            fireRequest(question, tags, difficulty);
+        }
+
+        function isEmpty(str) {
+            return (!str || str.trim().length == 0);
+        }
+
+        function fireRequest(question, tags, difficulty) {
+
+            $.ajax({
+                url: '/addQuestion/add',
+                type: 'POST',
+                data: { question: question, tags: tags, difficulty: difficulty },
+                dataType: 'json',
+                success: function(result) {
+                    alert("success::" + result.result);
+                },
+                error: function(xhr, ajaxOptions, thrownError) {
+                    alert("error::" + thrownError);
+                }
+            });
+        }
+    </script>
+</head>
+<body>
+    <h1>Add Questions</h1>
+    <textarea rows="10" cols="100" id="question_container" placeholder="Type question"></textarea>
+    <br/><br/>
+    Question tags : <input type="text" id="question_tags" placeholder="tags separated by ,">
+    <br/><br/>
+    Difficulty type : <input type="text" id="question_difficulty" placeholder="difficulty on scale of 1 - 10">
+    <br/><br/>
+    <button onclick="doSubmit()">Submit</button>
+</body>
+</html>
