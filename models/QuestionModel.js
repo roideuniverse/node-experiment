@@ -5,7 +5,9 @@ var Schema = mongoose.Schema;
 var questionSchema = new Schema({
     question: { type: String, required: true, unique: true },
     tags: { type: String, required: true },
-    difficulty: { type: String, required: true }
+    difficulty: { type: Number, required: true },
+    answered: { type: Boolean, required: false },
+    canRepeat: { type: Boolean}
 });
 
 // the schema is useless so far

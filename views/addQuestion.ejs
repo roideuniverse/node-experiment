@@ -16,8 +16,8 @@
             function doSubmit() {
                 $('#post_result').hide();
                 var question = $('#question_container').val();
-                var tags = $('#question_container').val();
-                var difficulty = $('#question_container').val();
+                var tags = $('#question_tags').val();
+                var difficulty = $('#question_difficulty').val();
 
                 if(isEmpty(question)) {
                     alert("enter Question");

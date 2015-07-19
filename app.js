@@ -9,14 +9,19 @@ var mongoose = require('mongoose');
 mongoose.connect('mongodb://localhost/question_bank');
 var db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
-db.once('open', function (callback) {
-    console.log("open success:callback=" + callback);
+db.once('open', function (dberror) {
+    if(dberror) {
+        console.log("db-failed");
+        return;
+    }
+    console.log("db-success");
 });
 
 var routes = require('./routes/index');
 var users = require('./routes/users');
 var addQuestion = require('./routes/addQuestion');
 var viewQuestions = require('./routes/viewQuestions');
+var compile = require('./routes/compile');
 var app = express();
 
 // view engine setup
@@ -31,10 +36,11 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', routes);
-app.use('/users', users);
+app.use('/', routes );
+app.use('/users', users );
 app.use('/addQuestion', addQuestion );
 app.use('/viewQuestions', viewQuestions );
+app.use('/compile', compile );
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

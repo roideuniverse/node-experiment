@@ -2,7 +2,137 @@
 <html>
 <head>
     <title>View Questions</title>
+    <script type="text/javascript" src="/javascripts/jquery-1.11.2.js"></script>
+    <script type="text/javascript" src="/javascripts/mustache.js"></script>
+    <script type="text/javascript" src="/javascripts/underscore.js"></script>
+    <script type="text/javascript" src="/javascripts/backbone.js"></script>
+    <script type="text/template" id="answer_template">
+        <div>
+            <a href="#" id="question_text"> {{ question }}</a>
+            <br>
+            <div id="answer-view" style="display:none;">
+                <textarea rows="10" cols="100" id="answer_container" placeholder="Answer"></textarea>
+                <button id="answer_submit">Submit</button>
+                </div>
+            <div id="result"></div>
+            <br>
+        </div>
+    </script>
+    <script type="application/javascript">
+        //backbone
+        $(function(){
+
+            function isEmpty(str) {
+                return (!str || str.trim().length == 0);
+            }
+
+            var Question = Backbone.Model.extend({
+                defaults: function() {
+                    return {
+                        question: '',
+                        tags: '',
+                        difficulty: ''
+                    }
+                }
+            });
+
+            var QuestionList = Backbone.Collection.extend({
+                model: Question,
+                url: '/viewQuestions/fetchAll'
+            });
+
+            var Questions = new QuestionList;
+
+            var QuestionView = Backbone.View.extend({
+                tagName: 'div',
+                events: {
+                    'click #question_text': 'onShowTextArea',
+                    'click #answer_submit': 'onAnswerSubmit'
+                },
+
+                initialize: function() {
+                    console.log("QuestionView-initialize");
+                    _.bindAll(this, "onShowTextArea");
+                    this.listenTo(this.model, 'change', this.render);
+                },
+
+                render: function() {
+                    var template = $("#answer_template").html();
+                    Mustache.parse(template);
+                    var html = Mustache.render(template, this.model.toJSON());
+                    this.$el.html(html);
+                    return this;
+                },
+
+                onShowTextArea: function() {
+                    console.log("onClick::");
+                    console.log(this.$el);
+                    this.$el.find("#answer-view").show();
+                },
+
+                onAnswerSubmit: function() {
+                    console.log("onAnswerSubmit::");
+                    var code = this.$el.find("#answer_container").val();
+
+                    if(isEmpty(code)) {
+                        alert("Write some code first");
+                        return;
+                    }
+
+                    $.ajax({
+                        url: '/compile',
+                        type: 'POST',
+                        data: { code: code },
+                        dataType: 'json',
+                        success: function(result) {
+                            console.log("success");
+                            console.log(result)
+                        },
+                        error: function(xhr, ajaxOptions, thrownError) {
+                            alert("error::" + thrownError);
+                        }
+                    });
+
+                }
+
+            });
+
+            var AppView = Backbone.View.extend({
+                el: $("#question-app"),
+                events: {
+                },
+                initialize: function() {
+                    console.log("AppView-initialize");
+
+                    this.listenTo(Questions, "add", this.addOne);
+                    this.listenTo(Questions, "reset", this.addAll);
+                    this.listenTo(Questions, "all", this.render);
+                    Questions.fetch();
+                },
+
+                render: function() {
+                    console.log("AppView-render");
+                },
+
+                addOne: function(question) {
+                    console.log("addOne");
+                    console.log(question);
+                    var view = new QuestionView( {model:question});
+                    this.$el.append(view.render().el);
+                },
+
+                addAll: function() {
+                    console.log("addAll");
+                }
+            });
+
+            var app = new AppView;
+        });
+    </script>
 </head>
-<body>
-</body>
+    <body>
+    Heya <br>
+    <div id="question-app"></div>
+    <br><br><br>
+    </body>
 </html>
