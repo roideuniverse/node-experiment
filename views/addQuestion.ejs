@@ -53,12 +53,13 @@
                     success: function(result) {
                         console.log(result);
                         $('#post_result').show();
-                        //clearFields();
+                        clearFields();
 
                     },
                     error: function(xhr, ajaxOptions, thrownError) {
                         alert("error::" + thrownError + "=>" + xhr.responseText );
                         console.log(xhr);
+                        $('#post_result').hide();
                     }
                 });
             }
