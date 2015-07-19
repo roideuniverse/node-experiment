@@ -6,8 +6,10 @@
     <script type="text/javascript" src="/javascripts/mustache.js"></script>
     <script type="text/javascript" src="/javascripts/underscore.js"></script>
     <script type="text/javascript" src="/javascripts/backbone.js"></script>
-    <script type="text/template" id="answer_template">
+    <script type="text/template" id="view_expanded_question_template">
         <div>
+            <button id="view_close">close</button>
+            <br> <br>
             <a href="#" id="question_text"> {{ question }}</a>
             <br>
             <div id="answer-view" style="display:none;">
@@ -18,6 +20,24 @@
             <br>
         </div>
     </script>
+
+    <script type="text/template" id="view_question_template">
+        <div>
+            <a href="#" id="question_text"> {{ question }}</a>
+            <br>
+                {{#tags}}
+                    "{{tags}}"
+                {{/tags}}
+            <br>
+            <div id="answer-view" style="display:none;">
+                <textarea rows="10" cols="100" id="answer_container" placeholder="Answer"></textarea>
+                <button id="answer_submit">Submit</button>
+            </div>
+            <div id="result"></div>
+            <br>
+        </div>
+    </script>
+
     <script type="application/javascript">
         //backbone
         $(function(){
@@ -65,7 +85,7 @@
                 },
 
                 render: function() {
-                    var template = $("#answer_template").html();
+                    var template = $("#view_question_template").html();
                     Mustache.parse(template);
                     var html = Mustache.render(template, this.model.toJSON());
                     this.$el.html(html);
@@ -75,7 +95,9 @@
                 onShowTextArea: function() {
                     console.log("onClick::");
                     console.log(this.$el);
-                    this.$el.find("#answer-view").show();
+                    //this.$el.find("#answer-view").show();
+                    this.model.trigger("selected", this.model);
+
                 },
 
                 onAnswerSubmit: function() {
@@ -107,16 +129,50 @@
 
             });
 
+            var DetailedQuestionView = Backbone.View.extend({
+                tagName: 'div',
+                events: {
+                    'click #question_text': 'onShowTextArea',
+                    'click #view_close' : 'close'
+                },
+
+                initialize : function() {
+                    console.log("Detailed-initialize");
+                    _.bindAll(this, "onShowTextArea");
+                    this.listenTo(this.model, 'change', this.render);
+                },
+
+                render: function() {
+                    console.log("detailed-render");
+                    var template = $("#view_expanded_question_template").html();
+                    Mustache.parse(template);
+                    var html = Mustache.render(template, this.model.toJSON());
+                    console.log(this.model.toJSON());
+                    this.$el.html(html);
+                    return this;
+                },
+
+                onShowTextArea: function() {
+                    this.$el.find("#answer-view").show();
+                },
+
+                close: function() {
+                    console.log("close");
+                    this.model.trigger('close_expanded_view');
+                }
+            });
+
             var DashboardView = Backbone.View.extend({
                 el: $("#container"),
-                events: {
-                },
                 initialize: function() {
                     console.log("AppView-initialize");
 
                     this.listenTo(Questions, "add", this.addOne);
                     this.listenTo(Questions, "reset", this.addAll);
                     this.listenTo(Questions, "all", this.render);
+                    this.listenTo(Questions, "selected", this.selected);
+                    this.listenTo(Questions, "close_expanded_view", this.closeExpandedView);
+                    this.expandedView = null;
                     Questions.fetch();
                 },
 
@@ -128,11 +184,25 @@
                     console.log("addOne");
                     console.log(question);
                     var view = new QuestionView( {model:question});
-                    this.$el.append(view.render().el);
+                    this.$el.find('#list_questions').append(view.render().el);
                 },
 
                 addAll: function() {
                     console.log("addAll");
+                },
+
+                selected: function(model) {
+                    console.log("selected::");
+                    console.log(model);
+                    this.$el.find('#list_questions').hide();
+                    this.expandedView  = new DetailedQuestionView({model : model});
+                    this.$el.find('#detail_question').append(this.expandedView.render().el);
+                },
+
+                closeExpandedView: function() {
+                    console.log("close expanded view");
+                    this.expandedView.remove();
+                    this.$el.find('#list_questions').show();
                 }
             });
 
@@ -141,8 +211,11 @@
     </script>
 </head>
     <body>
-    Heya <br>
-    <div id="container"></div>
+    <br>
+    <div id="container">
+        <div id="list_questions"></div>
+        <div id="detail_question"></div>
+    </div>
     <br><br><br>
     </body>
 </html>
