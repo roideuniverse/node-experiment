@@ -26,6 +26,14 @@
                 return (!str || str.trim().length == 0);
             }
 
+            var Tag = Backbone.Model.extend({
+                defaults: function() {
+                    return {
+                        tag: ''
+                    }
+                }
+            });
+
             var Question = Backbone.Model.extend({
                 defaults: function() {
                     return {
@@ -79,6 +87,8 @@
                         return;
                     }
 
+                    /*
+                    There is no need to compile - just save it
                     $.ajax({
                         url: '/compile',
                         type: 'POST',
@@ -91,14 +101,14 @@
                         error: function(xhr, ajaxOptions, thrownError) {
                             alert("error::" + thrownError);
                         }
-                    });
+                    });*/
 
                 }
 
             });
 
-            var AppView = Backbone.View.extend({
-                el: $("#question-app"),
+            var DashboardView = Backbone.View.extend({
+                el: $("#container"),
                 events: {
                 },
                 initialize: function() {
@@ -126,13 +136,13 @@
                 }
             });
 
-            var app = new AppView;
+            var app = new DashboardView;
         });
     </script>
 </head>
     <body>
     Heya <br>
-    <div id="question-app"></div>
+    <div id="container"></div>
     <br><br><br>
     </body>
 </html>

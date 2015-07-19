@@ -43,18 +43,23 @@
 
             function fireRequest(question, tags, difficulty) {
 
+                tags = JSON.stringify(tags.split(','));
+                console.log("tags=" + tags);
                 $.ajax({
                     url: '/addQuestion/add',
                     type: 'POST',
                     data: { question: question, tags: tags, difficulty: difficulty },
                     dataType: 'json',
                     success: function(result) {
+                        console.log(result);
                         $('#post_result').show();
                         clearFields();
 
                     },
                     error: function(xhr, ajaxOptions, thrownError) {
-                        alert("error::" + thrownError);
+                        alert("error::" + thrownError + "=>" + xhr.responseText );
+                        console.log(xhr);
+                        $('#post_result').hide();
                     }
                 });
             }
